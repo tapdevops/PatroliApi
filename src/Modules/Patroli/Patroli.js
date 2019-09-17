@@ -13,14 +13,20 @@ export default class Patroli extends Component{
 
         this.state={
             patroliStatus: false,
-            timerStatus: false,
 
             titikapi: 0,
 
-            time: "00:00:00",
-            jam: 0,
-            menit: 59,
-            detik: 55,
+            session:{
+                sessionStatus: false,
+                sessionName: null
+            },
+
+            timer:{
+                time: "00:00:00",
+                jam: 0,
+                menit: 59,
+                detik: 55,
+            }
         }
     }
 
@@ -61,9 +67,11 @@ export default class Patroli extends Component{
                             }, ()=>{
                                 if (this.state.patroliStatus){
                                     this.timerStart();
+                                    this.trackStart();
                                 }
                                 else {
                                     this.timerStop();
+                                    this.trackStop();
                                 }
                             })
                         }}
@@ -97,7 +105,7 @@ export default class Patroli extends Component{
                             }}
                             source={require('../../Asset/Icon/ic_timer.png')}
                         />
-                        <Text style={{flex: 4}}>{this.state.time}</Text>
+                        <Text style={{flex: 4}}>{this.state.timer.time}</Text>
                     </View>
                     <View style={{
                         flexDirection:"row",
@@ -162,9 +170,9 @@ export default class Patroli extends Component{
 
     timerStart(){
         let timerInterval = setInterval(()=>{
-            let detik = parseInt(this.state.detik) + 1;
-            let menit = parseInt(this.state.menit);
-            let jam = parseInt(this.state.jam);
+            let detik = parseInt(this.state.timer.detik) + 1;
+            let menit = parseInt(this.state.timer.menit);
+            let jam = parseInt(this.state.timer.jam);
 
             if (detik === 60) {
                 menit = menit + 1;
@@ -180,33 +188,73 @@ export default class Patroli extends Component{
             let labelMenit = menit < 10 ? `0${menit.toString()}` : menit.toString();
             let labelJam = jam < 10 ? `0${jam.toString()}` : jam.toString();
             this.setState({
-                time: `${labelJam}:${labelMenit}:${labelDetik}`,
-                jam: jam,
-                menit: menit,
-                detik: detik,
+                timer:{
+                    time: `${labelJam}:${labelMenit}:${labelDetik}`,
+                    jam: jam,
+                    menit: menit,
+                    detik: detik,
+                }
             });
         }, 1000);
 
         this.setState({
             timerInterval,
-            timerStatus: true
-        });
-    }
-
-    timerStop(){
-        clearInterval(this.state.timerInterval);
-        this.setState({timerStatus : false})
-    }
-
-    onButtonClear(){
-        this.setState({
             timer:{
-                time: null,
-                jam: "00",
-                menit: "00",
-                detik: "00",
+                ...this.state.timer
             }
         });
+    }
+    timerStop(){
+        clearInterval(this.state.timerInterval);
+    }
+
+    trackStart(){
+        let trackInterval = setInterval(()=>{
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    let latitude = position.coords.latitude;
+                    let longitude = position.coords.longitude;
+                    alert(latitude.toString()+":"+longitude.toString())
+                },
+                (error) => {
+
+                },
+                {
+                    //enableHighAccuracy : aktif highaccuration
+                    enableHighAccuracy: false,
+                    // timeout : max time to getCurrentLocation
+                    timeout: 10000,
+                    // maximumAge : using last cache if not get real position
+                    maximumAge: 0
+                },
+            );
+        }, 5000);
+
+        this.setState({
+            trackInterval
+        });
+    }
+    trackStop(){
+        clearInterval(this.state.timerInterval);
+    }
+
+    saveSession(){
+        let sessionModel = {
+            ID: {type: 'string', optional: false},
+            NAME: {type: 'string', optional: false},
+            INSERT_TIME: {type: 'double', optional: false},
+            END_TIME: {type: 'double', optional: false}
+        }
+    }
+
+    saveCoordinate(sessionID){
+        let coordinateModel = {
+            ID: {type: 'string', optional: false},
+            ID_SESSION: {type: 'string', optional: false},
+            LONGITUDE: {type: 'string', optional: false},
+            LATITUDE: {type: 'string', optional: false},
+            FIRE_STATUS: {type: 'boolean', optional: false},
+        }
     }
 
 }
