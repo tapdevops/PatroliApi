@@ -124,10 +124,6 @@ export default class Patroli extends Component{
                         <Text style={{flex: 4}}>{this.state.titikapi + " Titik Api"}</Text>
                     </View>
                 </View>
-                <View style={{alignItems:"center"}}>
-                    <Text style={{textAlign:"center", paddingTop: 10, paddingVertical: 5, paddingHorizontal: 50}} >FILEPATHFILEPATH FILEHFILEILE PATH FILEPATH</Text>
-                    <Text style={{textAlign:"center", paddingVertical: 5, paddingHorizontal: 50}} >FILE PATH</Text>
-                </View>
                 <View style={{
                     flex: 1.5,
                     alignItems:"center",
@@ -230,7 +226,7 @@ export default class Patroli extends Component{
             Geolocation.getCurrentPosition(geolocation => {
                 this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "N");
             });
-        }, 5000);
+        }, 30000);
 
         this.setState({
             trackInterval

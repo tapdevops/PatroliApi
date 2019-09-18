@@ -64,9 +64,9 @@ export default class KirimData extends Component{
                                 }}>
                                     <Text>{item.NAME+"_"+item.ID}</Text>
                                     <TouchableOpacity
-                                        onPress={()=>{
+                                        onPress={async ()=>{
                                             let fileName = item.NAME+"_"+item.ID+".kml";
-                                            let fileData = "hello world";
+                                            let fileData = await this.generateKMLData(item.ID, item.NAME);
                                             this.generateKMLFile(fileName.toString(), fileData.toString());
                                         }}
                                     >
@@ -112,15 +112,77 @@ export default class KirimData extends Component{
 
     generateKMLFile(fileName, fileData){
         let finalPath = directoryKML + "/" + fileName;
-        console.log("final path",finalPath);
         createFileUTF8(finalPath, fileData)
             .then((response)=>{
                 console.log("GENERATE KML", response);
             })
     }
 
-    generateKMLData(){
+    async generateKMLData(sessionID, userName){
+        let stringTitikApi = "";
+        let garisCoordinate = "";
 
+        //TITIK API
+        let getTitikApi = RealmServices.query("TABLE_COORDINATE", `ID_SESSION = "${sessionID}" AND FIRE_STATUS = "Y"`).sorted("INSERT_TIME", false);
+        await Promise.all(
+            getTitikApi.map((data, index)=>{
+                let titikApi = `<?xml version="1.0" encoding="UTF-8"?>
+<Placemark>
+    <name>TITIK API ${index+1}</name>
+    <Point>
+        <coordinates>
+            ${data.LONGITUDE},${data.LATITUDE}
+        </coordinates>
+    </Point>
+</Placemark>\n`;
+                stringTitikApi = stringTitikApi + titikApi.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
+            })
+        );
+        //LINE
+        let getCoordinate = RealmServices.findBy("TABLE_COORDINATE", "ID_SESSION", sessionID).sorted("INSERT_TIME", false);
+        await Promise.all(
+            getCoordinate.map((data, index)=>{
+                if (getCoordinate.length < index){
+                    garisCoordinate = garisCoordinate + `${data.LONGITUDE.toString()},${data.LATITUDE.toString()}\n`
+                }
+                else {
+                    garisCoordinate = garisCoordinate + `${data.LONGITUDE.toString()},${data.LATITUDE.toString()}\n`
+                }
+            })
+        );
+
+        let finalKMLString = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+
+<Document>
+    <name>${userName}_${sessionID}</name>
+    ${stringTitikApi}
+    <Style id="yellowLineGreenPoly">
+        <LineStyle>
+            <color>7f00ffff</color>
+            <width>4</width>
+        </LineStyle>
+        <PolyStyle>
+            <color>7f00ff00</color>
+        </PolyStyle>
+    </Style>
+    <Placemark>
+        <name>Absolute Extruded</name>
+        <description>Transparent green wall with yellow outlines</description>
+        <styleUrl>#yellowLineGreenPoly</styleUrl>
+        <LineString>
+            <extrude>1</extrude>
+            <tessellate>1</tessellate>
+            <altitudeMode>absolute</altitudeMode>
+            <coordinates>
+                ${garisCoordinate}
+            </coordinates>
+        </LineString>
+    </Placemark>
+</Document>
+</kml>`;
+
+        return finalKMLString;
     }
 
 }
