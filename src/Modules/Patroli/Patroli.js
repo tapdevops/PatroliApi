@@ -1,8 +1,11 @@
 import React, {Component} from 'react';
 import {View, Text, TextInput, TouchableOpacity, Image} from 'react-native';
+import Geolocation from '@react-native-community/geolocation';
+import moment from 'moment';
+
+import RealmServices from '../../Data/Realm/RealmServices';
 
 import {Header} from '../../UI/Component'
-import {Icon} from '../../UI/Widgets'
 
 import * as SIZE from '../../Data/Constant/Size';
 import * as COLOR from '../../Data/Constant/Color';
@@ -13,25 +16,19 @@ export default class Patroli extends Component{
 
         this.state={
             patroliStatus: false,
+            patroliSession: null,
 
+            userName: null,
             titikapi: 0,
 
-            session:{
-                sessionStatus: false,
-                sessionName: null
-            },
 
             timer:{
                 time: "00:00:00",
                 jam: 0,
-                menit: 59,
-                detik: 55,
+                menit: 0,
+                detik: 0,
             }
         }
-    }
-
-    componentDidMount(): void {
-
     }
 
     render(){
@@ -56,24 +53,26 @@ export default class Patroli extends Component{
                     <TextInput
                         style={{
                             width: "50%",
-                            marginVertical: 15
+                            marginVertical: 15,
+                            textAlign: "center"
                         }}
+                        value={this.state.userName}
+                        onChangeText={(value) => {
+                            this.setState({
+                                userName: value
+                            })
+                        }}
+                        editable={!this.state.patroliStatus}
                         underlineColorAndroid={COLOR.GREY}
                     />
                     <TouchableOpacity
                         onPress={()=>{
-                            this.setState({
-                                patroliStatus: !this.state.patroliStatus
-                            }, ()=>{
-                                if (this.state.patroliStatus){
-                                    this.timerStart();
-                                    this.trackStart();
-                                }
-                                else {
-                                    this.timerStop();
-                                    this.trackStop();
-                                }
-                            })
+                            if(this.state.userName !== null && this.state.userName !== undefined){
+                                this.sessionStart()
+                            }
+                            else {
+                                alert("Username tidak boleh kosong!");
+                            }
                         }}
                         style={{
                             width: "50%",
@@ -141,6 +140,8 @@ export default class Patroli extends Component{
                             if (this.state.patroliStatus){
                                 this.setState({
                                     titikapi: this.state.titikapi + 1
+                                },()=>{
+                                    this.insertTemuanApi(this.state.patroliSession)
                                 })
                             }
                         }}
@@ -208,26 +209,27 @@ export default class Patroli extends Component{
         clearInterval(this.state.timerInterval);
     }
 
-    trackStart(){
-        let trackInterval = setInterval(()=>{
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    let latitude = position.coords.latitude;
-                    let longitude = position.coords.longitude;
-                    alert(latitude.toString()+":"+longitude.toString())
-                },
-                (error) => {
+    sessionStart(){
+        this.setState({
+            patroliStatus: !this.state.patroliStatus,
+            patroliSession: "P"+moment().format("YYYYMMDDHHmmss").toString()
+        }, ()=>{
+            if (this.state.patroliStatus){
+                this.saveSession(this.state.patroliSession);
+                this.timerStart();
+                this.trackStart(this.state.patroliSession);
+            }
+            else {
+                this.clearSession();
+            }
+        });
+    };
 
-                },
-                {
-                    //enableHighAccuracy : aktif highaccuration
-                    enableHighAccuracy: false,
-                    // timeout : max time to getCurrentLocation
-                    timeout: 10000,
-                    // maximumAge : using last cache if not get real position
-                    maximumAge: 0
-                },
-            );
+    trackStart(sessionID){
+        let trackInterval = setInterval(()=>{
+            Geolocation.getCurrentPosition(geolocation => {
+                this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "N");
+            });
         }, 5000);
 
         this.setState({
@@ -235,25 +237,61 @@ export default class Patroli extends Component{
         });
     }
     trackStop(){
-        clearInterval(this.state.timerInterval);
+        clearInterval(this.state.trackInterval);
     }
 
-    saveSession(){
-        let sessionModel = {
-            ID: {type: 'string', optional: false},
-            NAME: {type: 'string', optional: false},
-            INSERT_TIME: {type: 'double', optional: false},
-            END_TIME: {type: 'double', optional: false}
+    clearSession(){
+        this.setState({
+            patroliStatus: false,
+            patroliSession: null,
+
+            userName: null,
+            titikapi: 0,
+
+
+            timer:{
+                time: "00:00:00",
+                jam: 0,
+                menit: 0,
+                detik: 0,
+            }
+        },()=>{
+            this.timerStop();
+            this.trackStop();
+        });
+    }
+
+    insertTemuanApi(sessionID){
+        if(this.state.patroliStatus){
+            Geolocation.getCurrentPosition(geolocation => {
+                this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "Y");
+            });
         }
     }
 
-    saveCoordinate(sessionID){
-        let coordinateModel = {
-            ID: {type: 'string', optional: false},
-            ID_SESSION: {type: 'string', optional: false},
-            LONGITUDE: {type: 'string', optional: false},
-            LATITUDE: {type: 'string', optional: false},
-            FIRE_STATUS: {type: 'boolean', optional: false},
+    saveSession(sessionID){
+        let sessionModel = {
+            ID: sessionID.toString(),
+            NAME: this.state.userName.toString(),
+            INSERT_TIME: parseFloat(moment().format("YYYYMMDDHHmmss"))
+        };
+        RealmServices.saveData("TABLE_SESSION", sessionModel);
+    }
+
+    saveCoordinate(sessionID, longitude, latitude, fireStatus){
+        try{
+            let coordinateModel = {
+                ID: "CR"+moment().format("YYYYMMDDHHmmss"),
+                ID_SESSION: sessionID.toString(),
+                LONGITUDE: longitude.toString(),
+                LATITUDE: latitude.toString(),
+                INSERT_TIME: parseFloat(moment().format("YYYYMMDDHHmmss")),
+                FIRE_STATUS: fireStatus.toString(),
+            };
+            RealmServices.saveData("TABLE_COORDINATE", coordinateModel);
+        }
+        catch (e) {
+            alert(e);
         }
     }
 

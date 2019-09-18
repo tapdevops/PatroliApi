@@ -8,8 +8,7 @@ export const TABLE_SESSION = {
     properties: {
         ID: {type: 'string', optional: false},
         NAME: {type: 'string', optional: false},
-        INSERT_TIME: {type: 'double', optional: false},
-        END_TIME: {type: 'double', optional: false}
+        INSERT_TIME: {type: 'double', optional: false}
     }
 };
 
@@ -21,7 +20,8 @@ export const TABLE_COORDINATE = {
         ID_SESSION: {type: 'string', optional: false},
         LONGITUDE: {type: 'string', optional: false},
         LATITUDE: {type: 'string', optional: false},
-        FIRE_STATUS: {type: 'boolean', optional: false},
+        INSERT_TIME: {type: 'double', optional: false},
+        FIRE_STATUS: {type: 'string', optional: false}
     }
 };
 

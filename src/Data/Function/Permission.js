@@ -41,7 +41,7 @@ export async function getPermission() {
             // phone === PermissionsAndroid.RESULTS.GRANTED &&
             // camera === PermissionsAndroid.RESULTS.GRANTED &&
             storage === PermissionsAndroid.RESULTS.GRANTED &&
-            location === PermissionsAndroid.RESULTS.GRANTED &&
+            location === PermissionsAndroid.RESULTS.GRANTED&&
             storageWrite === PermissionsAndroid.RESULTS.GRANTED
         );
 
