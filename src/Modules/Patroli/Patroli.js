@@ -223,10 +223,16 @@ export default class Patroli extends Component{
 
     trackStart(sessionID){
         let trackInterval = setInterval(()=>{
-            Geolocation.getCurrentPosition(geolocation => {
-                this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "N");
-            });
-        }, 30000);
+            Geolocation.getCurrentPosition(
+                geolocation => {
+                    this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "N");
+                },
+                ((e) => {
+                    console.log(e);
+                }),
+                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+            );
+        }, 5000);
 
         this.setState({
             trackInterval
@@ -259,9 +265,15 @@ export default class Patroli extends Component{
 
     insertTemuanApi(sessionID){
         if(this.state.patroliStatus){
-            Geolocation.getCurrentPosition(geolocation => {
-                this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "Y");
-            });
+            Geolocation.getCurrentPosition(
+                geolocation => {
+                    this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "Y");
+                },
+                ((e) => {
+                    console.log(e);
+                }),
+                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+            );
         }
     }
 

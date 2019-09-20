@@ -3,7 +3,8 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
-import {Icon} from '../UI/Widgets';
+import {Image} from '../UI/Widgets';
+
 import * as COLOR from '../Data/Constant/Color';
 import * as SIZE from '../Data/Constant/Size';
 
@@ -20,10 +21,11 @@ const DashboardTabbar = createBottomTabNavigator(
                 title: "Patroli",
                 tabBarIcon: ({ focused, tintColor }) =>{
                     return(
-                        <Icon
-                            iconName={"home"}
-                            iconColor={tintColor}
-                            iconSize={SIZE.ICON_LARGE}/>
+                        <Image
+                            style={{width: 30, height: 30}}
+                            imageSource={focused ? require('../Asset/Icon/ic_fire_red.png') : require('../Asset/Icon/ic_fire_grey.png')}
+                            imageResizeMode={"stretch"}
+                        />
                     )
                 },
                 tabBarOptions: {
@@ -39,10 +41,11 @@ const DashboardTabbar = createBottomTabNavigator(
                 header: null,
                 tabBarIcon: ({ focused, tintColor }) =>{
                     return(
-                        <Icon
-                            iconName={"account-circle"}
-                            iconColor={tintColor}
-                            iconSize={SIZE.ICON_LARGE}/>
+                        <Image
+                            style={{width: 30, height: 30}}
+                            imageSource={focused ? require('../Asset/Icon/ic_kirimemail_red.png') : require('../Asset/Icon/ic_kirimemail_grey.png')}
+                            imageResizeMode={"stretch"}
+                        />
                     )
                 },
                 tabBarOptions: {
@@ -62,6 +65,18 @@ const StackNavigation = createStackNavigator(
         //dashboard
         Dashboard:{
             screen: DashboardTabbar,
+            navigationOptions:{
+                header: null,
+            }
+        },
+        Patroli:{
+            screen: Patroli,
+            navigationOptions:{
+                header: null,
+            }
+        },
+        KirimData:{
+            screen: KirimData,
             navigationOptions:{
                 header: null,
             }

@@ -1,14 +1,6 @@
 import React from 'react';
 import RNFetchBlob from 'rn-fetch-blob';
 
-// (pathDir.DocumentDir)
-// (pathDir.CacheDir)
-// (pathDir.DCIMDir)
-// (pathDir.DownloadDir)
-export const pathDir =  RNFetchBlob.fs.dirs;
-const fs = RNFetchBlob.fs;
-
-
 //folder path example "/image/image.png"
 export async function createDirectory(folderPath){
     let responseStatus = {
@@ -16,7 +8,7 @@ export async function createDirectory(folderPath){
         message: null
     };
 
-    await RNFetchBlob.fs.mkdir(pathDir.DocumentDir+folderPath)
+    await RNFetchBlob.fs.mkdir(folderPath)
         .then((response)=>{
             if(response){
                 responseStatus = {
@@ -64,10 +56,9 @@ export async function createFileUTF8(filePath, fileData){
         status: false,
         message: null
     };
-    let finalFilePath = pathDir.DocumentDir + filePath;
 
-    await RNFetchBlob.fs.writeFile(finalFilePath, fileData, 'utf8')
-        .then(() => {
+    await RNFetchBlob.fs.writeFile(filePath, fileData, 'utf8')
+        .then((result) => {
             responseStatus = {
                 status: true,
                 message: "File Created!"

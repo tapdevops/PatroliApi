@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View, Image, FlatList, TouchableOpacity} from 'react-native';
+import moment from 'moment';
+import Mailer from 'react-native-mail';
 
 import {createFileUTF8} from '../../Data/Function/FetchBlob';
 import {directoryKML} from '../../Data/Constant/FilePath';
@@ -15,11 +17,20 @@ export default class KirimData extends Component{
         super();
         this.state={
             sessionList: []
-        }
+        };
     }
 
     componentDidMount(): void {
-        this.getAllSession();
+        this.didFocus = this.props.navigation.addListener(
+            'didFocus',
+            ()=>{
+                this.getAllSession()
+            }
+        );
+    }
+
+    componentWillUnmount() {
+        this.didFocus.remove();
     }
 
     render(){
@@ -62,12 +73,20 @@ export default class KirimData extends Component{
                                     flexDirection: "row",
                                     justifyContent: "space-between"
                                 }}>
-                                    <Text>{item.NAME+"_"+item.ID}</Text>
+                                    <Text>{item.NAME+"_"+item.INSERT_TIME}</Text>
                                     <TouchableOpacity
                                         onPress={async ()=>{
-                                            let fileName = item.NAME+"_"+item.ID+".kml";
+                                            let fileName = item.NAME+"_"+item.ID.replace("P","")+".kml";
+                                            let filePath = directoryKML + "/" + fileName;
                                             let fileData = await this.generateKMLData(item.ID, item.NAME);
-                                            this.generateKMLFile(fileName.toString(), fileData.toString());
+                                            console.log("filepath1", filePath);
+                                            this.generateKMLFile(filePath.toString(), fileData.toString())
+                                                .then((response)=>{
+                                                    if(response){
+                                                        // this.props.navigation.navigate("Patroli")
+                                                        this.handleEmail(filePath, fileName, item);
+                                                    }
+                                                })
                                         }}
                                     >
                                         <Image
@@ -104,18 +123,23 @@ export default class KirimData extends Component{
     }
 
     getAllSession(){
-        let sessionData = RealmServices.getAllData("TABLE_SESSION");
+        let sessionData = RealmServices.getAllData("TABLE_SESSION").sorted("INSERT_TIME", true);
         this.setState({
             sessionList: sessionData
         });
     }
 
-    generateKMLFile(fileName, fileData){
-        let finalPath = directoryKML + "/" + fileName;
-        createFileUTF8(finalPath, fileData)
+    async generateKMLFile(filePath, fileData){
+        let status = false;
+        await createFileUTF8(filePath, fileData)
             .then((response)=>{
-                console.log("GENERATE KML", response);
+                status = true
             })
+            .catch((e)=>{
+                status = false;
+            });
+
+        return status
     }
 
     async generateKMLData(sessionID, userName){
@@ -185,4 +209,27 @@ export default class KirimData extends Component{
         return finalKMLString;
     }
 
+    handleEmail(filePath, fileName, sessionData){
+        let formatDate = moment(sessionData.INSERT_TIME, "YYYYMMDDHHmmss").format("DD MMM YY, HH:mm");
+        Mailer.mail({
+            subject: `Patroli Api - ${sessionData.NAME} - ${formatDate}`,
+            recipients: ['hotspot@tap-agri.com'],
+            ccRecipients: [''],
+            bccRecipients: [''],
+            body: `Dengan ini saya ${sessionData.NAME} menyatakan telah melakukan patroli api\npada ${formatDate}.\nTerlampir hasil patroli saya.`,
+            isHTML: false,
+            attachment: {
+                path: filePath,  // The absolute path of the file from which to read data.
+                type: 'kml',   // Mime Type: jpg, png, doc, ppt, html, pdf, csv
+                name: fileName,   // Optional: Custom filename for attachment
+            }
+        }, (error, event) => {
+            console.log(event);
+            console.log('OK: Email Error Response');
+            console.log('CANCEL: Email Error Response');
+        });
+    };
+
+    sendMail(){
+    }
 }
