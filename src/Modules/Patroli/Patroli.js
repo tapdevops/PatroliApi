@@ -31,6 +31,8 @@ export default class Patroli extends Component{
         }
     }
 
+    componentDidMount(): void {}
+
     render(){
         return(
             <View
@@ -206,6 +208,7 @@ export default class Patroli extends Component{
     }
 
     sessionStart(){
+        this.startWatchPosition();
         this.setState({
             patroliStatus: !this.state.patroliStatus,
             patroliSession: "P"+moment().format("YYYYMMDDHHmmss").toString()
@@ -224,19 +227,16 @@ export default class Patroli extends Component{
     startWatchPosition(){
         Geolocation.watchPosition(
             (geolocation)=>{},
-            (e)=>{
-                alert("ERR",e);
-            },
-            { enableHighAccuracy: true, timeout: 2000, maximumAge: 0, distanceFilter: 1}
+            (e)=>{},
+            { enableHighAccuracy: true, timeout: 1000, maximumAge: 0, distanceFilter: 1}
         )
     }
 
     stopWatchPosition(){
-
+        Geolocation.stopObserving();
     }
 
     trackStart(sessionID){
-        this.startWatchPosition();
         let trackInterval = setInterval(()=>{
             Geolocation.getCurrentPosition(
                 geolocation => {
@@ -247,7 +247,7 @@ export default class Patroli extends Component{
                 }),
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
-        }, 5000);
+        }, 30000);
 
         this.setState({
             trackInterval
