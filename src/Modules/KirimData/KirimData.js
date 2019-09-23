@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, Image, FlatList, TouchableOpacity} from 'react-native';
 import moment from 'moment';
 import Mailer from 'react-native-mail';
+import { zip, unzip, unzipAssets, subscribe } from 'react-native-zip-archive'
 
 import {generateKMLFile, generateKMLData} from '../../Data/Function/FileGenerator/KMLFile';
 import {generateCSVFile, patroliToCsvFormat} from '../../Data/Function/FileGenerator/CSVFile';
@@ -79,7 +80,6 @@ export default class KirimData extends Component{
                                         onPress={()=>{
                                             this.sendFiles(item)
                                                 .then((response)=>{
-                                                    alert(response)
                                                 })
                                         }}
                                     >
@@ -128,8 +128,15 @@ export default class KirimData extends Component{
         let statusCSV = await this.createCSVFile(sessionModel);
 
         if(statusCSV && statusKML){
-
-            this.sendEmail(filePath, fileName, sessionData);
+            let zipPath = directoryPatroli + `/${sessionModel.ID}`;
+            let zipDestination = directoryPatroli + `/${sessionModel.ID}.zip`;
+            await zip(zipPath.toString(), zipDestination.toString())
+                .then((path) => {
+                    this.sendEmail(path, sessionModel);
+                })
+                .catch((error) => {
+                    alert(error)
+                });
             return true;
         }
         else {
@@ -174,20 +181,20 @@ export default class KirimData extends Component{
         return successStatus;
     }
 
-    sendEmail(filePath, fileName, sessionData){
-        let formatDate = moment(sessionData.INSERT_TIME, "YYYYMMDDHHmmss").format("DD MMM YY, HH:mm");
+    sendEmail(filePath, sessionModel){
+        let formatDate = moment(sessionModel.INSERT_TIME, "YYYYMMDDHHmmss").format("DD MMM YY, HH:mm");
         try {
             Mailer.mail({
-                subject: `Patroli Api - ${sessionData.NAME} - ${formatDate}`,
+                subject: `Patroli Api - ${sessionModel.NAME} - ${formatDate}`,
                 recipients: ['hotspot@tap-agri.com'],
                 ccRecipients: [''],
                 bccRecipients: [''],
-                body: `Dengan ini saya ${sessionData.NAME} menyatakan telah melakukan patroli api\npada ${formatDate}.\nTerlampir hasil patroli saya.`,
+                body: `Dengan ini saya ${sessionModel.NAME} menyatakan telah melakukan patroli api\npada ${formatDate}.\nTerlampir hasil patroli saya.`,
                 isHTML: false,
                 attachment: {
                     path: filePath,  // The absolute path of the file from which to read data.
-                    type: 'kml',   // Mime Type: jpg, png, doc, ppt, html, pdf, csv
-                    name: fileName,   // Optional: Custom filename for attachment
+                    type: 'zip',   // Mime Type: jpg, png, doc, ppt, html, pdf, csv
+                    name: sessionModel.ID.replace("P",""),   // Optional: Custom filename for attachment
                 }
             }, (error, event) => {
                 alert("Err email:",error);
