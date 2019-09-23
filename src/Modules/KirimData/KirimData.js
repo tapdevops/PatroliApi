@@ -3,8 +3,9 @@ import {Text, View, Image, FlatList, TouchableOpacity} from 'react-native';
 import moment from 'moment';
 import Mailer from 'react-native-mail';
 
-import {createFileUTF8} from '../../Data/Function/FetchBlob';
-import {directoryKML} from '../../Data/Constant/FilePath';
+import {generateKMLFile, generateKMLData} from '../../Data/Function/FileGenerator/KMLFile';
+import {generateCSVFile, patroliToCsvFormat} from '../../Data/Function/FileGenerator/CSVFile';
+import {directoryPatroli} from '../../Data/Constant/FilePath';
 
 import RealmServices from '../../Data/Realm/RealmServices';
 import * as COLOR from "../../Data/Constant/Color";
@@ -75,17 +76,10 @@ export default class KirimData extends Component{
                                 }}>
                                     <Text>{item.NAME+"_"+item.INSERT_TIME}</Text>
                                     <TouchableOpacity
-                                        onPress={async ()=>{
-                                            let fileName = item.NAME+"_"+item.ID.replace("P","")+".kml";
-                                            let filePath = directoryKML + "/" + fileName;
-                                            let fileData = await this.generateKMLData(item.ID, item.NAME);
-                                            console.log("filepath1", filePath);
-                                            this.generateKMLFile(filePath.toString(), fileData.toString())
+                                        onPress={()=>{
+                                            this.sendFiles(item)
                                                 .then((response)=>{
-                                                    if(response){
-                                                        // this.props.navigation.navigate("Patroli")
-                                                        this.handleEmail(filePath, fileName, item);
-                                                    }
+                                                    alert(response)
                                                 })
                                         }}
                                     >
@@ -129,107 +123,80 @@ export default class KirimData extends Component{
         });
     }
 
-    async generateKMLFile(filePath, fileData){
-        let status = false;
-        await createFileUTF8(filePath, fileData)
+    async sendFiles(sessionModel){
+        let statusKML = await this.createKMLFile(sessionModel);
+        let statusCSV = await this.createCSVFile(sessionModel);
+
+        if(statusCSV && statusKML){
+
+            this.sendEmail(filePath, fileName, sessionData);
+            return true;
+        }
+        else {
+
+            return false;
+        }
+    }
+
+    async createKMLFile(sessionModel){
+        let successStatus = false;
+
+        let fileName = sessionModel.NAME+"_"+sessionModel.ID.replace("P","")+".kml";
+        let filePath = directoryPatroli + `/${sessionModel.ID}/` + fileName;
+        let fileData = await generateKMLData(sessionModel.ID, sessionModel.NAME);
+        await generateKMLFile(filePath.toString(), fileData.toString())
             .then((response)=>{
-                status = true
-            })
-            .catch((e)=>{
-                status = false;
+                if(response){
+                    // this.props.navigation.navigate("Patroli")
+                    // this.handleEmail(filePath, fileName, item);
+                    successStatus = true;
+                }
             });
 
-        return status
+        return successStatus;
     }
 
-    async generateKMLData(sessionID, userName){
-        let stringTitikApi = "";
-        let garisCoordinate = "";
+    async createCSVFile(sessionModel){
+        let successStatus = true;
 
-        //TITIK API
-        let getTitikApi = RealmServices.query("TABLE_COORDINATE", `ID_SESSION = "${sessionID}" AND FIRE_STATUS = "Y"`).sorted("INSERT_TIME", false);
-        await Promise.all(
-            getTitikApi.map((data, index)=>{
-                let titikApi = `<?xml version="1.0" encoding="UTF-8"?>
-<Placemark>
-    <name>TITIK API ${index+1}</name>
-    <Point>
-        <coordinates>
-            ${data.LONGITUDE},${data.LATITUDE}
-        </coordinates>
-    </Point>
-</Placemark>\n`;
-                stringTitikApi = stringTitikApi + titikApi.replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "");
-            })
-        );
-        //LINE
-        let getCoordinate = RealmServices.findBy("TABLE_COORDINATE", "ID_SESSION", sessionID).sorted("INSERT_TIME", false);
-        await Promise.all(
-            getCoordinate.map((data, index)=>{
-                if (getCoordinate.length < index){
-                    garisCoordinate = garisCoordinate + `${data.LONGITUDE.toString()},${data.LATITUDE.toString()}\n`
+        let fileName = sessionModel.NAME+"_"+sessionModel.ID.replace("P","")+".csv";
+        let filePath = directoryPatroli + `/${sessionModel.ID}/` + fileName;
+        let fileData = await patroliToCsvFormat(sessionModel.ID);
+        generateCSVFile(filePath.toString(), fileData.toString())
+            .then((response)=>{
+                if(response){
+                    // this.props.navigation.navigate("Patroli")
+                    // this.handleEmail(filePath, fileName, item);
+                    successStatus = true;
                 }
-                else {
-                    garisCoordinate = garisCoordinate + `${data.LONGITUDE.toString()},${data.LATITUDE.toString()}\n`
-                }
-            })
-        );
+            });
 
-        let finalKMLString = `<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://www.opengis.net/kml/2.2">
-
-<Document>
-    <name>${userName}_${sessionID}</name>
-    ${stringTitikApi}
-    <Style id="yellowLineGreenPoly">
-        <LineStyle>
-            <color>7f00ffff</color>
-            <width>4</width>
-        </LineStyle>
-        <PolyStyle>
-            <color>7f00ff00</color>
-        </PolyStyle>
-    </Style>
-    <Placemark>
-        <name>Absolute Extruded</name>
-        <description>Transparent green wall with yellow outlines</description>
-        <styleUrl>#yellowLineGreenPoly</styleUrl>
-        <LineString>
-            <extrude>1</extrude>
-            <tessellate>1</tessellate>
-            <altitudeMode>absolute</altitudeMode>
-            <coordinates>
-                ${garisCoordinate}
-            </coordinates>
-        </LineString>
-    </Placemark>
-</Document>
-</kml>`;
-
-        return finalKMLString;
+        return successStatus;
     }
 
-    handleEmail(filePath, fileName, sessionData){
+    sendEmail(filePath, fileName, sessionData){
         let formatDate = moment(sessionData.INSERT_TIME, "YYYYMMDDHHmmss").format("DD MMM YY, HH:mm");
-        Mailer.mail({
-            subject: `Patroli Api - ${sessionData.NAME} - ${formatDate}`,
-            recipients: ['hotspot@tap-agri.com'],
-            ccRecipients: [''],
-            bccRecipients: [''],
-            body: `Dengan ini saya ${sessionData.NAME} menyatakan telah melakukan patroli api\npada ${formatDate}.\nTerlampir hasil patroli saya.`,
-            isHTML: false,
-            attachment: {
-                path: filePath,  // The absolute path of the file from which to read data.
-                type: 'kml',   // Mime Type: jpg, png, doc, ppt, html, pdf, csv
-                name: fileName,   // Optional: Custom filename for attachment
-            }
-        }, (error, event) => {
-            console.log(event);
-            console.log('OK: Email Error Response');
-            console.log('CANCEL: Email Error Response');
-        });
+        try {
+            Mailer.mail({
+                subject: `Patroli Api - ${sessionData.NAME} - ${formatDate}`,
+                recipients: ['hotspot@tap-agri.com'],
+                ccRecipients: [''],
+                bccRecipients: [''],
+                body: `Dengan ini saya ${sessionData.NAME} menyatakan telah melakukan patroli api\npada ${formatDate}.\nTerlampir hasil patroli saya.`,
+                isHTML: false,
+                attachment: {
+                    path: filePath,  // The absolute path of the file from which to read data.
+                    type: 'kml',   // Mime Type: jpg, png, doc, ppt, html, pdf, csv
+                    name: fileName,   // Optional: Custom filename for attachment
+                }
+            }, (error, event) => {
+                alert("Err email:",error);
+                return false
+            });
+            return true
+        }
+        catch (e) {
+            return false
+        }
     };
-
-    sendMail(){
-    }
 }

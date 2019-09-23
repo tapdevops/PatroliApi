@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Navigator from './src/Navigation/Navigator';
 
 import {getPermission} from './src/Data/Function/Permission';
-import {directoryKML} from './src/Data/Constant/FilePath';
+import {directoryPatroli} from './src/Data/Constant/FilePath';
 import {createDirectory} from './src/Data/Function/FetchBlob';
 
 export default class App extends Component{
@@ -29,7 +29,7 @@ export default class App extends Component{
     }
 
     initDirectory(){
-        createDirectory(directoryKML)
+        createDirectory(directoryPatroli)
             .then((response)=>{})
     }
 }

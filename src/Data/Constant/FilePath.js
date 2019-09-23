@@ -14,4 +14,4 @@ import RNFetchBlob from 'rn-fetch-blob';
 export const pathDir =  RNFetchBlob.fs.dirs;
 
 //folder directory
-export const directoryKML = pathDir.SDCardApplicationDir+"/KML";
+export const directoryPatroli = pathDir.SDCardApplicationDir+"/Patroli";
