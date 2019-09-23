@@ -221,7 +221,22 @@ export default class Patroli extends Component{
         });
     };
 
+    startWatchPosition(){
+        Geolocation.watchPosition(
+            (geolocation)=>{},
+            (e)=>{
+                alert("ERR",e);
+            },
+            { enableHighAccuracy: true, timeout: 2000, maximumAge: 0, distanceFilter: 1}
+        )
+    }
+
+    stopWatchPosition(){
+
+    }
+
     trackStart(sessionID){
+        this.startWatchPosition();
         let trackInterval = setInterval(()=>{
             Geolocation.getCurrentPosition(
                 geolocation => {
@@ -230,7 +245,7 @@ export default class Patroli extends Component{
                 ((e) => {
                     console.log(e);
                 }),
-                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }, 5000);
 
@@ -243,6 +258,7 @@ export default class Patroli extends Component{
     }
 
     clearSession(){
+        this.stopWatchPosition();
         this.setState({
             patroliStatus: false,
             patroliSession: null,
@@ -272,7 +288,7 @@ export default class Patroli extends Component{
                 ((e) => {
                     console.log(e);
                 }),
-                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
     }
