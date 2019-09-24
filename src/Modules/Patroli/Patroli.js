@@ -258,7 +258,7 @@ export default class Patroli extends Component{
             (e)=>{
                 this.startWatchPosition();
             },
-            { enableHighAccuracy: false, timeout: 5000, maximumAge: 0, distanceFilter: 1}
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0, distanceFilter: 1}
         )
     }
 
