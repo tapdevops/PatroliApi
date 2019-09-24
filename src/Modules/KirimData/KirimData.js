@@ -129,7 +129,7 @@ export default class KirimData extends Component{
 
         if(statusCSV && statusKML){
             let zipPath = directoryPatroli + `/${sessionModel.ID}`;
-            let zipDestination = directoryPatroli + `/${sessionModel.ID}.zip`;
+            let zipDestination = directoryPatroli + `/${sessionModel.NAME}${sessionModel.ID.replace("P","")}.zip`;
             await zip(zipPath.toString(), zipDestination.toString())
                 .then((path) => {
                     this.sendEmail(path, sessionModel);

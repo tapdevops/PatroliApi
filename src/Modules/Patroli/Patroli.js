@@ -21,6 +21,10 @@ export default class Patroli extends Component{
             userName: null,
             titikapi: 0,
 
+            location:{
+                latitude: null,
+                longitude: null
+            },
 
             timer:{
                 time: "00:00:00",
@@ -31,7 +35,9 @@ export default class Patroli extends Component{
         }
     }
 
-    componentDidMount(): void {}
+    componentDidMount(): void {
+        this.startWatchPosition();
+    }
 
     render(){
         return(
@@ -70,7 +76,12 @@ export default class Patroli extends Component{
                     <TouchableOpacity
                         onPress={()=>{
                             if(this.state.userName !== null && this.state.userName !== undefined){
-                                this.sessionStart()
+                                if(this.state.location.latitude !== null && this.state.location.longitude !== null){
+                                    this.sessionStart()
+                                }
+                                else {
+                                    alert("Tidak dapat menemukan gps")
+                                }
                             }
                             else {
                                 alert("Username tidak boleh kosong!");
@@ -126,6 +137,9 @@ export default class Patroli extends Component{
                         <Text style={{flex: 4}}>{this.state.titikapi + " Titik Api"}</Text>
                     </View>
                 </View>
+                <Text style={{alignSelf:"center"}}>
+                    Latitude:{this.state.location.latitude} Longitude:{this.state.location.longitude}
+                </Text>
                 <View style={{
                     flex: 1.5,
                     alignItems:"center",
@@ -208,7 +222,6 @@ export default class Patroli extends Component{
     }
 
     sessionStart(){
-        this.startWatchPosition();
         this.setState({
             patroliStatus: !this.state.patroliStatus,
             patroliSession: "P"+moment().format("YYYYMMDDHHmmss").toString()
@@ -226,15 +239,24 @@ export default class Patroli extends Component{
 
     startWatchPosition(){
         Geolocation.watchPosition(
-            (geolocation)=>{},
-            (e)=>{},
-            { enableHighAccuracy: true, timeout: 1000, maximumAge: 0, distanceFilter: 1}
+            (geolocation)=>{
+                this.setState({
+                    location:{
+                        latitude: geolocation.coords.latitude,
+                        longitude: geolocation.coords.longitude
+                    }
+                })
+            },
+            (e)=>{
+                this.startWatchPosition();
+            },
+            { enableHighAccuracy: false, timeout: 5000, maximumAge: 0, distanceFilter: 1}
         )
     }
 
-    stopWatchPosition(){
-        Geolocation.stopObserving();
-    }
+    // stopWatchPosition(){
+    //     Geolocation.stopObserving();
+    // }
 
     trackStart(sessionID){
         let trackInterval = setInterval(()=>{
@@ -245,9 +267,9 @@ export default class Patroli extends Component{
                 ((e) => {
                     console.log(e);
                 }),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
             );
-        }, 30000);
+        }, 5000);
 
         this.setState({
             trackInterval
@@ -258,7 +280,7 @@ export default class Patroli extends Component{
     }
 
     clearSession(){
-        this.stopWatchPosition();
+        // this.stopWatchPosition();
         this.setState({
             patroliStatus: false,
             patroliSession: null,
@@ -288,7 +310,7 @@ export default class Patroli extends Component{
                 ((e) => {
                     console.log(e);
                 }),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
             );
         }
     }
