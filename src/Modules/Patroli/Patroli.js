@@ -22,6 +22,7 @@ export default class Patroli extends Component{
             titikapi: 0,
 
             location:{
+                fakeGPS: false,
                 latitude: null,
                 longitude: null
             },
@@ -77,10 +78,15 @@ export default class Patroli extends Component{
                         onPress={()=>{
                             if(this.state.userName !== null && this.state.userName !== undefined){
                                 if(this.state.location.latitude !== null && this.state.location.longitude !== null){
-                                    this.sessionStart()
+                                    if(!this.state.location.fakeGPS){
+                                        this.sessionStart()
+                                    }
+                                    else {
+                                        alert("Fake gps terdeteksi, tolong matikan terlebih dahulu");
+                                    }
                                 }
                                 else {
-                                    alert("Tidak dapat menemukan gps")
+                                    alert("Tidak dapat menemukan gps");
                                 }
                             }
                             else {
@@ -240,8 +246,10 @@ export default class Patroli extends Component{
     startWatchPosition(){
         Geolocation.watchPosition(
             (geolocation)=>{
+                console.log("HELLO",geolocation);
                 this.setState({
                     location:{
+                        fakeGPS: geolocation.mocked,
                         latitude: geolocation.coords.latitude,
                         longitude: geolocation.coords.longitude
                     }
@@ -267,7 +275,7 @@ export default class Patroli extends Component{
                 ((e) => {
                     console.log(e);
                 }),
-                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }, 5000);
 
@@ -310,7 +318,7 @@ export default class Patroli extends Component{
                 ((e) => {
                     console.log(e);
                 }),
-                { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
     }
@@ -334,7 +342,13 @@ export default class Patroli extends Component{
                 INSERT_TIME: parseFloat(moment().format("YYYYMMDDHHmmss")),
                 FIRE_STATUS: fireStatus.toString(),
             };
-            RealmServices.saveData("TABLE_COORDINATE", coordinateModel);
+            if(!this.state.location.fakeGPS){
+                RealmServices.saveData("TABLE_COORDINATE", coordinateModel);
+            }
+            else {
+                alert("Fake gps terdeteksi. Session patroli dihentikan!");
+                this.clearSession();
+            }
         }
         catch (e) {
             alert(e);
