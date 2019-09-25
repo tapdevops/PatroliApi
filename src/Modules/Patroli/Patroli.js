@@ -143,9 +143,8 @@ export default class Patroli extends Component{
                         <Text style={{flex: 4}}>{this.state.titikapi + " Titik Api"}</Text>
                     </View>
                 </View>
-                <Text style={{alignSelf:"center"}}>
-                    Latitude:{this.state.location.latitude} Longitude:{this.state.location.longitude}
-                </Text>
+                <Text style={{alignSelf:"center"}}>Latitude:{this.state.location.latitude}</Text>
+                <Text style={{alignSelf:"center"}}>Longitude:{this.state.location.longitude}</Text>
                 <View style={{
                     flex: 1.5,
                     alignItems:"center",
@@ -183,6 +182,7 @@ export default class Patroli extends Component{
                         <Text style={{color: COLOR.WHITE}}> Ada api disini!</Text>
                     </TouchableOpacity>
                 </View>
+                <Text style={{alignSelf:"center", color:COLOR.GREY, fontSize: SIZE.TEXT_SMALL, marginBottom: 5}}>V1.1</Text>
             </View>
         )
     }
