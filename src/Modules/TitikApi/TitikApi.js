@@ -38,35 +38,101 @@ export default class TitikApi extends Component{
                     textColor={COLOR.WHITE}
                     textSize={SIZE.TEXT_MEDIUM}
                     actionIconRight={()=>{
-
                         this.getCoordinateTap()
                     }}
                     iconSourceRight={"refresh"}
                 />
-                <MapView
-                    provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-                    style={{flex: 1}}
-                    mapType={"satellite"}
-                    showsUserLocation={true}
-                    region={this.state.region}>
-                    {
-                        this.state.coordinateTap.map((coordinate)=>{
-                            return(
-                                <Marker
-                                    title={"Titik Api TAP"}
-                                    coordinate={{
-                                        latitude: coordinate.latitude,
-                                        longitude: coordinate.longitude
-                                    }}>
-                                    <Image
-                                        style={{width: 20, height: 20}}
-                                        source={require('../../Asset/Icon/ic_location_tap.png')}
-                                    />
-                                </Marker>
-                            )
-                        })
-                    }
-                </MapView>
+                <View style={{flex: 1}}>
+                    <MapView
+                        provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+                        style={{flex: 1}}
+                        mapType={"satellite"}
+                        showsUserLocation={true}
+                        region={this.state.region}>
+                        {
+                            this.state.coordinateTap.map((coordinate)=>{
+                                return(
+                                    <Marker
+                                        title={"Titik Api TAP"}
+                                        coordinate={{
+                                            latitude: coordinate.latitude,
+                                            longitude: coordinate.longitude
+                                        }}>
+                                        <Image
+                                            style={{width: 20, height: 20}}
+                                            source={require('../../Asset/Icon/ic_location_tap.png')}
+                                        />
+                                    </Marker>
+                                )
+                            })
+                        }
+                    </MapView>
+                    <View style={{
+                        width: "100%",
+                        height: "100%",
+                        position: "absolute",
+                        alignItems: "flex-end",
+                        justifyContent: "flex-end"
+                    }}>
+                        <View style={{
+                            padding: 10,
+                            borderRadius: 5,
+                            backgroundColor: "rgba(0,0,0,0.3)"
+                        }}>
+                            <Text style={{
+                                color:COLOR.WHITE,
+                                paddingBottom: 5
+                            }}>
+                                Keterangan :
+                            </Text>
+                            <View style={{
+                                flexDirection: "row",
+                                alignItems:"center"
+                            }}>
+                                <Image
+                                    style={{width: 20, height: 20}}
+                                    source={require('../../Asset/Icon/ic_location_tap.png')}
+                                />
+                                <Text style={{
+                                    fontSize: SIZE.TEXT_SMALL,
+                                    color:COLOR.WHITE
+                                }}>
+                                    Titik Api Berdasarkan Info Patroli Api
+                                </Text>
+                            </View>
+                            <View style={{
+                                flexDirection: "row",
+                                alignItems:"center"
+                            }}>
+                                <Image
+                                    style={{width: 20, height: 20}}
+                                    source={require('../../Asset/Icon/ic_location_nasa.png')}
+                                />
+                                <Text style={{
+                                    fontSize: SIZE.TEXT_SMALL,
+                                    color:COLOR.WHITE
+                                }}>
+                                    Titik Api Berdasarkan Info NASA
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+                <View
+                    style={{
+                        height: 40,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "yellow"
+                    }}>
+                    <Text
+                        style={{
+                            color: COLOR.GREY,
+                            textAlign: "center"
+                        }}>
+                        {"Klik disini untuk memperbarui data. Kamu harus terhubung jaringan."}
+                    </Text>
+                </View>
             </View>
         )
     }

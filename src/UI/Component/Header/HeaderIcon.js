@@ -57,10 +57,9 @@ export function HeaderIcon(props) {
                     </View>
                 </TouchableOpacity>
             </View>
-            <View style={{flex: 1, alignSelf: "center", justifyContent: "center"}}>
+            <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
                 <Text
                     style={{
-                        textFontAlign:"center",
                         fontSize: textSize,
                         color: textColor
                     }}>
@@ -76,8 +75,10 @@ export function HeaderIcon(props) {
                         justifyContent:"center"
                     }}>
                         <Icon
-                            iconSize={SIZE.fnt_10}
-                            iconName={props.iconSourceRight}/>
+                            iconSize={SIZE.ICON_LARGE}
+                            iconColor={COLOR.WHITE}
+                            iconName={props.iconSourceRight}
+                        />
                     </View>
                 </TouchableOpacity>
             </View>

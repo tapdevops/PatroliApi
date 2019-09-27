@@ -43,7 +43,7 @@ const DashboardTabbar = createBottomTabNavigator(
                     return(
                         <Image
                             style={{width: 30, height: 30}}
-                            imageSource={focused ? require('../Asset/Icon/ic_kirimemail_red.png') : require('../Asset/Icon/ic_kirimemail_grey.png')}
+                            imageSource={focused ? require('../Asset/Icon/ic_titikapi_red.png') : require('../Asset/Icon/ic_titikapi_grey.png')}
                             imageResizeMode={"stretch"}
                         />
                     )
