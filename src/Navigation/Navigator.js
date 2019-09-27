@@ -1,14 +1,14 @@
 import React from 'react';
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
-import { createBottomTabNavigator } from 'react-navigation-tabs';
+import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+import {createBottomTabNavigator} from 'react-navigation-tabs';
 
 import {Image} from '../UI/Widgets';
 
 import * as COLOR from '../Data/Constant/Color';
-import * as SIZE from '../Data/Constant/Size';
 
 import Patroli from '../Modules/Patroli/Patroli';
+import TitikApi from '../Modules/TitikApi/TitikApi';
 import KirimData from '../Modules/KirimData/KirimData';
 
 const DashboardTabbar = createBottomTabNavigator(
@@ -32,6 +32,26 @@ const DashboardTabbar = createBottomTabNavigator(
                     activeTintColor: COLOR.TAB_NAVIGATOR_ACTIVE,
                     inactiveTintColor: COLOR.TAB_NAVIGATOR_DEFAULT,
                 },
+            }
+        },
+        TitikApi:{
+            screen: TitikApi,
+            title: "Titik Api",
+            navigationOptions:{
+                header: null,
+                tabBarIcon: ({ focused, tintColor }) =>{
+                    return(
+                        <Image
+                            style={{width: 30, height: 30}}
+                            imageSource={focused ? require('../Asset/Icon/ic_kirimemail_red.png') : require('../Asset/Icon/ic_kirimemail_grey.png')}
+                            imageResizeMode={"stretch"}
+                        />
+                    )
+                },
+                tabBarOptions: {
+                    activeTintColor: COLOR.TAB_NAVIGATOR_ACTIVE,
+                    inactiveTintColor: COLOR.TAB_NAVIGATOR_DEFAULT,
+                }
             }
         },
         KirimData:{

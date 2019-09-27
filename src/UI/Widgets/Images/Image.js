@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {View, Image, ActivityIndicator} from 'react-native';
+import {ActivityIndicator, Image, View} from 'react-native';
 import * as COLOR from '../../../Data/Constant/Color';
 
 export default class RNImage extends Component {

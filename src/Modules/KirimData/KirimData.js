@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
-import {Text, View, Image, FlatList, TouchableOpacity} from 'react-native';
+import {FlatList, Image, Text, TouchableOpacity, View} from 'react-native';
 import moment from 'moment';
 import Mailer from 'react-native-mail';
-import { zip, unzip, unzipAssets, subscribe } from 'react-native-zip-archive'
+import {zip} from 'react-native-zip-archive'
 
-import {generateKMLFile, generateKMLData} from '../../Data/Function/FileGenerator/KMLFile';
+import {generateKMLData, generateKMLFile} from '../../Data/Function/FileGenerator/KMLFile';
 import {generateCSVFile, patroliToCsvFormat} from '../../Data/Function/FileGenerator/CSVFile';
 import {directoryPatroli} from '../../Data/Constant/FilePath';
 

@@ -1,4 +1,4 @@
-import { PermissionsAndroid } from 'react-native';
+import {PermissionsAndroid} from 'react-native';
 
 export async function getPermission() {
     try {

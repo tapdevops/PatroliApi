@@ -246,10 +246,9 @@ export default class Patroli extends Component{
     startWatchPosition(){
         Geolocation.watchPosition(
             (geolocation)=>{
-                console.log("HELLO",geolocation);
                 this.setState({
                     location:{
-                        fakeGPS: geolocation.mocked,
+                        fakeGPS: false,
                         latitude: geolocation.coords.latitude,
                         longitude: geolocation.coords.longitude
                     }

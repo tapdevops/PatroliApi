@@ -5271,6 +5271,11 @@ react-native-mail@^4.0.0:
   resolved "https://registry.yarnpkg.com/react-native-mail/-/react-native-mail-4.0.0.tgz#f98fe5f99001e3d47d8bd45bbe1c70d81705fd22"
   integrity sha512-G6lLrWFj0JwKeMR/rXCFQu7dXLm1tbG0nnezMt9xTRXikvKFbz0BMp6JICOb/wO4VJf+FkCEoRHuouPEA1dPww==
 
+react-native-maps@0.25.0:
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/react-native-maps/-/react-native-maps-0.25.0.tgz#81bc51eb50e33811a9e1c345cc48869413ead67d"
+  integrity sha512-PFJuW1pt+HnnnN0m0OGk29RSvICFVkK/DScX6cUk0SuCSN2DAHx0y6y57lZyYXcYqU4J4usNpfxgp/ccjASDiw==
+
 react-native-reanimated@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-1.2.0.tgz#9219227a52a5dfa4d34c324596d6726ccd874293"

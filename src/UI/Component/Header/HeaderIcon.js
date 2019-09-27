@@ -1,8 +1,8 @@
 import React from 'react';
-import {View} from 'react-native';
+import {View, TouchableOpacity, Text} from 'react-native';
 import PropTypes from 'prop-types';
 
-import {Button, Container, Icon, Text} from '../../Widgets/index';
+import {Icon} from '../../Widgets/index';
 import * as COLOR from '../../../Data/Constant/Color';
 import * as SIZE from '../../../Data/Constant/Size';
 
@@ -11,7 +11,7 @@ HeaderIcon.defaultProps = {
     textSize: SIZE.fnt_5,
     textColor: COLOR.BLACK,
     textLabel: "",
-    iconSourceLeft: "keyboard-arrow-left",
+    iconSourceLeft: null,
     iconSourceRight: null,
     actionIconLeft: null,
     actionIconRight: null,
@@ -44,8 +44,8 @@ export function HeaderIcon(props) {
             borderColor: COLOR.GREY
         }}>
             <View style={{alignSelf: "center", justifyContent: "center"}}>
-                <Button action={props.actionIconLeft}>
-                    <Container style={{
+                <TouchableOpacity onPress={props.actionIconLeft}>
+                    <View style={{
                         width: 50,
                         height: 53,
                         alignItems:"center",
@@ -54,22 +54,22 @@ export function HeaderIcon(props) {
                         <Icon
                             iconSize={SIZE.fnt_10}
                             iconName={props.iconSourceLeft}/>
-                    </Container>
-                </Button>
+                    </View>
+                </TouchableOpacity>
             </View>
             <View style={{flex: 1, alignSelf: "center", justifyContent: "center"}}>
                 <Text
-                    textSpacing={null}
-                    textFontAlign={"center"}
-                    textLabel={textLabel}
-                    textSize={textSize}
-                    textColor={textColor}
-                    textLines={1}
-                />
+                    style={{
+                        textFontAlign:"center",
+                        fontSize: textSize,
+                        color: textColor
+                    }}>
+                    {textLabel}
+                </Text>
             </View>
             <View style={{alignSelf: "center", justifyContent: "center"}}>
-                <Button action={props.actionIconRight}>
-                    <Container style={{
+                <TouchableOpacity onPress={props.actionIconRight}>
+                    <View style={{
                         width: 50,
                         height: 53,
                         alignItems:"center",
@@ -78,8 +78,8 @@ export function HeaderIcon(props) {
                         <Icon
                             iconSize={SIZE.fnt_10}
                             iconName={props.iconSourceRight}/>
-                    </Container>
-                </Button>
+                    </View>
+                </TouchableOpacity>
             </View>
         </View>
     );
