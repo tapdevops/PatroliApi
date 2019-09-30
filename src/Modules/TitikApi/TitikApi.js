@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, TouchableOpacity, View, Image} from 'react-native';
+import {Text, View, Image} from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps'; // remove PROVIDER_GOOGLE import if not using Google Maps
 
 import RealmServices from '../../Data/Realm/RealmServices';
@@ -7,6 +7,7 @@ import * as COLOR from "../../Data/Constant/Color";
 import * as SIZE from "../../Data/Constant/Size";
 
 import {HeaderIcon} from "../../UI/Component";
+import Geolocation from "@react-native-community/geolocation";
 
 export default class TitikApi extends Component{
     constructor(){
@@ -24,17 +25,24 @@ export default class TitikApi extends Component{
     }
 
     componentDidMount(): void {
-        this.getCoordinateTap()
+        this.didFocus = this.props.navigation.addListener(
+            'didFocus',
+            ()=>{
+                this.getCoordinateTap();
+            }
+        );
     }
 
-    componentWillUnmount() {}
+    componentWillUnmount() {
+        this.didFocus.remove();
+    }
 
     render(){
         return(
             <View style={{flex: 1}}>
                 <HeaderIcon
                     backgroundColor={"red"}
-                    textLabel={"Kirim Data"}
+                    textLabel={"Titik Api"}
                     textColor={COLOR.WHITE}
                     textSize={SIZE.TEXT_MEDIUM}
                     actionIconRight={()=>{
@@ -118,66 +126,62 @@ export default class TitikApi extends Component{
                         </View>
                     </View>
                 </View>
-                <View
-                    style={{
-                        height: 40,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: "yellow"
-                    }}>
-                    <Text
-                        style={{
-                            color: COLOR.GREY,
-                            textAlign: "center"
-                        }}>
-                        {"Klik disini untuk memperbarui data. Kamu harus terhubung jaringan."}
-                    </Text>
-                </View>
+                {/*<View*/}
+                {/*    style={{*/}
+                {/*        height: 40,*/}
+                {/*        alignItems: "center",*/}
+                {/*        justifyContent: "center",*/}
+                {/*        backgroundColor: "yellow"*/}
+                {/*    }}>*/}
+                {/*    <Text*/}
+                {/*        style={{*/}
+                {/*            color: COLOR.GREY,*/}
+                {/*            textAlign: "center"*/}
+                {/*        }}>*/}
+                {/*        {"Klik disini untuk memperbarui data. Kamu harus terhubung jaringan."}*/}
+                {/*    </Text>*/}
+                {/*</View>*/}
             </View>
         )
     }
 
-    // renderMarker(){
-    //     this.state.coordinateTap.map((coordinate)=>{
-    //         console.log("COOR"+JSON.stringify(coordinate));
-    //         return(
-    //             <Marker
-    //                 title={"POINT 1"}
-    //                 description={"desc"}
-    //                 coordinate={{
-    //                     latitude: -2.9485251903533936,
-    //                     longitude: 112.34932708740234
-    //                 }}
-    //             />
-    //         )
-    //     })
-    // }
 
     //tarik data coordinate titik api di realm
     async getCoordinateTap(){
         let coordinateTap = RealmServices.query("TABLE_COORDINATE", `FIRE_STATUS = "Y"`);
         if(coordinateTap !== undefined){
             let tempCoordinateTap = [];
+
+            await Geolocation.getCurrentPosition(
+                geolocation => {
+                    this.setState({
+                        region:{
+                            latitude: geolocation.coords.latitude,
+                            longitude: geolocation.coords.longitude,
+                            latitudeDelta: 0.015,
+                            longitudeDelta: 0.0121,
+                        }
+                    })
+                },
+                ((e) => {
+                    console.log(e);
+                }),
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+
             await coordinateTap.map((coordinateModel, index)=>{
                 tempCoordinateTap.push({
                     latitude: parseFloat(coordinateModel.LATITUDE),
                     longitude: parseFloat(coordinateModel.LONGITUDE)
                 });
-                console.log("TEMPCOR",tempCoordinateTap[index]);
-                console.log("TEMPCORFLO",parseFloat(-2.9485251903533936));
             });
             this.setState({
-                region:{
-                    latitude: -2.9541356,
-                    longitude: 112.3548889,
-                    latitudeDelta: 0.015,
-                    longitudeDelta: 0.0121,
-                },
                 coordinateTap: [...this.state.coordinateTap, ...tempCoordinateTap]
             })
         }
     }
 
+    //tarik data coordinate titik api NASA
     async getCoordinateNasa(){
         let coordinateTap = RealmServices.query("TABLE_COORDINATE", `FIRE_STATUS = "Y"`);
         if(coordinateTap !== undefined){
