@@ -3,13 +3,14 @@ import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import {createBottomTabNavigator} from 'react-navigation-tabs';
 
-import {Image} from '../UI/Widgets';
+import {Image, Icon} from '../UI/Widgets';
 
 import * as COLOR from '../Data/Constant/Color';
 
 import Patroli from '../Modules/Patroli/Patroli';
 import TitikApi from '../Modules/TitikApi/TitikApi';
 import KirimData from '../Modules/KirimData/KirimData';
+import Setting from '../Modules/Settings/Setting';
 
 const DashboardTabbar = createBottomTabNavigator(
     {
@@ -74,6 +75,26 @@ const DashboardTabbar = createBottomTabNavigator(
                 }
             }
         },
+        Setting:{
+            screen: Setting,
+            title: "Setting",
+            navigationOptions:{
+                header: null,
+                tabBarIcon: ({ focused, tintColor }) =>{
+                    return(
+                        <Icon
+                            iconColor={focused ? "rgba(255,50,50,1)" : "rgba(166,166,166,1)"}
+                            iconName={"settings"}
+                            iconSize={30}
+                        />
+                    )
+                },
+                tabBarOptions: {
+                    activeTintColor: COLOR.TAB_NAVIGATOR_ACTIVE,
+                    inactiveTintColor: COLOR.TAB_NAVIGATOR_DEFAULT,
+                }
+            }
+        }
     },
     {
         initialRouteName: "Patroli"

@@ -140,7 +140,6 @@ export default class KirimData extends Component{
             return true;
         }
         else {
-
             return false;
         }
     }

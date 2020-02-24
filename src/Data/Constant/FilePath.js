@@ -15,3 +15,5 @@ export const pathDir =  RNFetchBlob.fs.dirs;
 
 //folder directory
 export const directoryPatroli = pathDir.SDCardApplicationDir+"/Patroli";
+export const pathDatabase = directoryPatroli+"/Database";
+export const pathZip = directoryPatroli+"/pathZip";

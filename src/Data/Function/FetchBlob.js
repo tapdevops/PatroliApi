@@ -1,7 +1,7 @@
 import React from 'react';
 import RNFetchBlob from 'rn-fetch-blob';
 
-//folder path example "/image/image.png"
+//folder path example "/image"
 export async function createDirectory(folderPath){
     let responseStatus = {
         status: false,
@@ -49,6 +49,28 @@ export async function deletePath(folderPath){
         });
 
     return responseStatus
+}
+
+export async function copyFile(SRC_PATH, DEST_PATH){
+    let copyStatus = {
+        status: false,
+        message: null
+    };
+    await RNFetchBlob.fs.cp(SRC_PATH, DEST_PATH)
+        .then(() => {
+            copyStatus = {
+                ...copyStatus,
+                status: true,
+            }
+        })
+        .catch((err) => {
+            copyStatus = {
+                ...copyStatus,
+                message: err
+            }
+        });
+
+    return copyStatus;
 }
 
 export async function createFileUTF8(filePath, fileData){

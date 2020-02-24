@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Navigator from './src/Navigation/Navigator';
 
 import {getPermission} from './src/Data/Function/Permission';
-import {directoryPatroli} from './src/Data/Constant/FilePath';
+import {directoryPatroli, pathDatabase, pathZip} from './src/Data/Constant/FilePath';
 import {createDirectory} from './src/Data/Function/FetchBlob';
 import Geolocation from "@react-native-community/geolocation";
 
@@ -31,8 +31,9 @@ export default class App extends Component{
     }
 
     initDirectory(){
-        createDirectory(directoryPatroli)
-            .then((response)=>{})
+        createDirectory(directoryPatroli);
+        createDirectory(pathDatabase);
+        createDirectory(pathZip);
     }
 
     //di pake buat update gps getcurrentposition tiap detik. ga ada ini geolocation getcurrentposition gk ke update!
