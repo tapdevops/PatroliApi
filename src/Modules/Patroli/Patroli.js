@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, Text, TextInput, TouchableOpacity, Image} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, Image, NativeModules, DeviceEventEmitter} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import moment from 'moment';
 
@@ -38,6 +38,7 @@ export default class Patroli extends Component{
 
     componentDidMount(): void {
         this.startWatchPosition();
+        this.startServiceListener();
     }
 
     render(){
@@ -76,22 +77,23 @@ export default class Patroli extends Component{
                     />
                     <TouchableOpacity
                         onPress={()=>{
-                            if(this.state.userName !== null && this.state.userName !== undefined){
-                                if(this.state.location.latitude !== null && this.state.location.longitude !== null){
-                                    if(!this.state.location.fakeGPS){
-                                        this.sessionStart()
-                                    }
-                                    else {
-                                        alert("Fake gps terdeteksi, tolong matikan terlebih dahulu");
-                                    }
-                                }
-                                else {
-                                    alert("Tidak dapat menemukan gps");
-                                }
-                            }
-                            else {
-                                alert("Username tidak boleh kosong!");
-                            }
+                            NativeModules.LocationService.startService()
+                            // if(this.state.userName !== null && this.state.userName !== undefined){
+                            //     if(this.state.location.latitude !== null && this.state.location.longitude !== null){
+                            //         if(!this.state.location.fakeGPS){
+                            //             this.sessionStart()
+                            //         }
+                            //         else {
+                            //             alert("Fake gps terdeteksi, tolong matikan terlebih dahulu");
+                            //         }
+                            //     }
+                            //     else {
+                            //         alert("Tidak dapat menemukan gps");
+                            //     }
+                            // }
+                            // else {
+                            //     alert("Username tidak boleh kosong!");
+                            // }
                         }}
                         style={{
                             width: "50%",
@@ -106,6 +108,41 @@ export default class Patroli extends Component{
                                 color:COLOR.WHITE
                             }}>
                             {this.state.patroliStatus ? "Selesai Patroli":"Mulai Patroli"}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={()=>{
+                            NativeModules.LocationService.stopService()
+                            // if(this.state.userName !== null && this.state.userName !== undefined){
+                            //     if(this.state.location.latitude !== null && this.state.location.longitude !== null){
+                            //         if(!this.state.location.fakeGPS){
+                            //             this.sessionStart()
+                            //         }
+                            //         else {
+                            //             alert("Fake gps terdeteksi, tolong matikan terlebih dahulu");
+                            //         }
+                            //     }
+                            //     else {
+                            //         alert("Tidak dapat menemukan gps");
+                            //     }
+                            // }
+                            // else {
+                            //     alert("Username tidak boleh kosong!");
+                            // }
+                        }}
+                        style={{
+                            width: "50%",
+                            alignItems: "center",
+                            backgroundColor: this.state.patroliStatus ? COLOR.GREY : COLOR.RED,
+                            paddingVertical: 10,
+                            marginVertical: 10,
+                            borderRadius: 20
+                        }}>
+                        <Text
+                            style={{
+                                color:COLOR.WHITE
+                            }}>
+                            STOP
                         </Text>
                     </TouchableOpacity>
                     <View style={{
@@ -186,6 +223,12 @@ export default class Patroli extends Component{
             </View>
         )
     }
+
+    startServiceListener(){
+        DeviceEventEmitter.addListener('LOCATIONSERVICE', () => {
+          console.log(`LAT: ${this.state.location.latitude} LONG: ${this.state.location.longitude}`);
+        });
+      }
 
     timerStart(){
         let timerInterval = setInterval(()=>{
