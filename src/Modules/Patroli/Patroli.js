@@ -3,6 +3,7 @@ import {View, Text, TextInput, TouchableOpacity, Image, NativeModules, DeviceEve
 import Geolocation from '@react-native-community/geolocation';
 import moment from 'moment';
 
+import {getPermission} from '../../Data/Function/Permission';
 import RealmServices from '../../Data/Realm/RealmServices';
 
 import {Header} from '../../UI/Component'
@@ -36,9 +37,14 @@ export default class Patroli extends Component{
         }
     }
 
-    componentDidMount(): void {
-        this.startWatchPosition();
-        this.startServiceListener();
+    async componentDidMount(): void {
+        await getPermission()
+            .then((response)=>{
+                if(response){
+                    this.startServiceListener();
+                    this.startWatchPosition();
+                }
+            })
     }
 
     render(){
@@ -77,21 +83,26 @@ export default class Patroli extends Component{
                     />
                     <TouchableOpacity
                         onPress={()=>{
-                            if(this.state.userName !== null && this.state.userName !== undefined){
-                                if(this.state.location.latitude !== null && this.state.location.longitude !== null){
-                                    if(!this.state.location.fakeGPS){
-                                        this.sessionStart()
+                            if(!this.state.patroliStatus){
+                                if(this.state.userName !== null && this.state.userName !== undefined){
+                                    if(this.state.location.latitude !== null && this.state.location.longitude !== null){
+                                        if(!this.state.location.fakeGPS){
+                                            this.sessionStart()
+                                        }
+                                        else {
+                                            alert("Fake gps terdeteksi, tolong matikan terlebih dahulu");
+                                        }
                                     }
                                     else {
-                                        alert("Fake gps terdeteksi, tolong matikan terlebih dahulu");
+                                        alert("Tidak dapat menemukan gps");
                                     }
                                 }
                                 else {
-                                    alert("Tidak dapat menemukan gps");
+                                    alert("Username tidak boleh kosong!");
                                 }
                             }
-                            else {
-                                alert("Username tidak boleh kosong!");
+                            else{
+                                this.clearSession();
                             }
                         }}
                         style={{
@@ -159,7 +170,7 @@ export default class Patroli extends Component{
                                 this.setState({
                                     titikapi: this.state.titikapi + 1
                                 },()=>{
-                                    this.insertTemuanApi(this.state.patroliSession)
+                                    this.insertTemuanApi()
                                 })
                             }
                         }}
@@ -189,79 +200,62 @@ export default class Patroli extends Component{
     }
 
     startServiceListener(){
+        NativeModules.LocationService.stopService();
         DeviceEventEmitter.addListener('LOCATIONSERVICE', () => {
-          if(this.state.patroliStatus){
-              Geolocation.getCurrentPosition(
-                geolocation => {
-                    this.saveCoordinate(this.state.patroliSession, geolocation.coords.longitude, geolocation.coords.latitude, "N");
-                },
-                ((e) => {
-                    console.log(e);
-                }),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-          }
-          else{
-            this.clearSession();
-            NativeModules.LocationService.stopService();
-          }
+            this.timerStart();
+            if(this.state.patroliStatus && parseInt(this.state.timer.detik) % 5 === 0){
+                Geolocation.getCurrentPosition(
+                    geolocation => {
+                        this.saveCoordinate(this.state.patroliSession, geolocation.coords.longitude, geolocation.coords.latitude, "N");
+                    },
+                    ((e) => {
+                        console.log(e);
+                    }),
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
         });
       }
 
     timerStart(){
-        let timerInterval = setInterval(()=>{
-            let detik = parseInt(this.state.timer.detik) + 1;
-            let menit = parseInt(this.state.timer.menit);
-            let jam = parseInt(this.state.timer.jam);
+        let detik = parseInt(this.state.timer.detik) + 1;
+        let menit = parseInt(this.state.timer.menit);
+        let jam = parseInt(this.state.timer.jam);
 
-            if (detik === 60) {
-                menit = menit + 1;
-                detik = 0;
-            }
+        if (detik === 60) {
+            menit = menit + 1;
+            detik = 0;
+        }
 
-            if(parseInt(menit) === 60){
-                jam = jam + 1;
-                menit = 0;
-            }
+        if(parseInt(menit) === 60){
+            jam = jam + 1;
+            menit = 0;
+        }
 
-            let labelDetik = detik < 10 ? `0${detik.toString()}` : detik.toString();
-            let labelMenit = menit < 10 ? `0${menit.toString()}` : menit.toString();
-            let labelJam = jam < 10 ? `0${jam.toString()}` : jam.toString();
-            this.setState({
-                timer:{
-                    time: `${labelJam}:${labelMenit}:${labelDetik}`,
-                    jam: jam,
-                    menit: menit,
-                    detik: detik,
-                }
-            });
-        }, 1000);
-
+        let labelDetik = detik < 10 ? `0${detik.toString()}` : detik.toString();
+        let labelMenit = menit < 10 ? `0${menit.toString()}` : menit.toString();
+        let labelJam = jam < 10 ? `0${jam.toString()}` : jam.toString();
         this.setState({
-            timerInterval,
             timer:{
-                ...this.state.timer
+                time: `${labelJam}:${labelMenit}:${labelDetik}`,
+                jam: jam,
+                menit: menit,
+                detik: detik,
             }
         });
-    }
-    timerStop(){
-        clearInterval(this.state.timerInterval);
     }
 
     sessionStart(){
         this.setState({
-            patroliStatus: !this.state.patroliStatus,
+            patroliStatus: true,
             patroliSession: "P"+moment().format("YYYYMMDDHHmmss").toString()
         }, ()=>{
             if (this.state.patroliStatus){
                 this.saveSession(this.state.patroliSession);
-                this.timerStart();
                 NativeModules.LocationService.startService();
-                // this.trackStart(this.state.patroliSession);
             }
             else {
                 this.clearSession();
-                NativeModules.LocationService.stopService();
             }
         });
     };
@@ -284,40 +278,14 @@ export default class Patroli extends Component{
         )
     }
 
-    // stopWatchPosition(){
-    //     Geolocation.stopObserving();
-    // }
-
-    trackStart(sessionID){
-        let trackInterval = setInterval(()=>{
-            Geolocation.getCurrentPosition(
-                geolocation => {
-                    this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "N");
-                },
-                ((e) => {
-                    console.log(e);
-                }),
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        }, 5000);
-
-        this.setState({
-            trackInterval
-        });
-    }
-    trackStop(){
-        clearInterval(this.state.trackInterval);
-    }
-
     clearSession(){
         // this.stopWatchPosition();
+        NativeModules.LocationService.stopService();
         this.setState({
             patroliStatus: false,
-            patroliSession: null,
 
             userName: null,
             titikapi: 0,
-
 
             timer:{
                 time: "00:00:00",
@@ -325,17 +293,14 @@ export default class Patroli extends Component{
                 menit: 0,
                 detik: 0,
             }
-        },()=>{
-            this.timerStop();
-            this.trackStop();
         });
     }
 
-    insertTemuanApi(sessionID){
+    insertTemuanApi(){
         if(this.state.patroliStatus){
             Geolocation.getCurrentPosition(
                 geolocation => {
-                    this.saveCoordinate(sessionID, geolocation.coords.longitude, geolocation.coords.latitude, "Y");
+                    this.saveCoordinate(this.state.patroliSession, geolocation.coords.longitude, geolocation.coords.latitude, "Y");
                 },
                 ((e) => {
                     console.log(e);
@@ -355,25 +320,20 @@ export default class Patroli extends Component{
     }
 
     saveCoordinate(sessionID, longitude, latitude, fireStatus){
-        try{
-            let coordinateModel = {
-                ID: "CR"+moment().format("YYYYMMDDHHmmss"),
-                ID_SESSION: sessionID.toString(),
-                LONGITUDE: longitude.toString(),
-                LATITUDE: latitude.toString(),
-                INSERT_TIME: parseFloat(moment().format("YYYYMMDDHHmmss")),
-                FIRE_STATUS: fireStatus.toString(),
-            };
-            if(!this.state.location.fakeGPS){
-                RealmServices.saveData("TABLE_COORDINATE", coordinateModel);
-            }
-            else {
-                alert("Fake gps terdeteksi. Session patroli dihentikan!");
-                this.clearSession();
-            }
+        let coordinateModel = {
+            ID: "CR"+moment().format("YYYYMMDDHHmmss"),
+            ID_SESSION: sessionID.toString(),
+            LONGITUDE: longitude.toString(),
+            LATITUDE: latitude.toString(),
+            INSERT_TIME: parseFloat(moment().format("YYYYMMDDHHmmss")),
+            FIRE_STATUS: fireStatus.toString(),
+        };
+        if(!this.state.location.fakeGPS){
+            RealmServices.saveData("TABLE_COORDINATE", coordinateModel);
         }
-        catch (e) {
-            alert(e);
+        else {
+            alert("Fake gps terdeteksi. Session patroli dihentikan!");
+            this.clearSession();
         }
     }
 

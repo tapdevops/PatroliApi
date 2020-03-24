@@ -29,7 +29,7 @@ public class LocationService extends Service {
         @Override
         public void run() {
             LocationServiceModule.reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("LOCATIONSERVICE",null);
-            handler.postDelayed(this, 2000);
+            handler.postDelayed(this, 1000);
         }
     };
     private void createNotificationChannel() {
