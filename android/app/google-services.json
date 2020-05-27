@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "997383226987",
+    "firebase_url": "https://patroli-api.firebaseio.com",
+    "project_id": "patroli-api",
+    "storage_bucket": "patroli-api.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997383226987:android:05165c55422ada65b2932e",
+        "android_client_info": {
+          "package_name": "com.patroliapi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "997383226987-cp48fr2g384djtv2p3j1gkmffo5i3fir.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.patroliapi",
+            "certificate_hash": "0dca6562ddb062ecd02f101c5148dbd90f55faf6"
+          }
+        },
+        {
+          "client_id": "997383226987-o997403jp4fd5e67kbctfmi7vdebh8t3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAx4tLibDiIH75K3eHwn0-qx8r9g7bSh_s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "997383226987-o997403jp4fd5e67kbctfmi7vdebh8t3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
